@@ -5,8 +5,8 @@ const express = require("express");
 const morgan = require("morgan");
 
 const app = express();
-  
-const productos = [
+
+let productos = [
   {
     id: 1,
     nombre: "celular",
@@ -29,17 +29,50 @@ app.get("/productos", (req, res) => {
   res.json(productos);
 });
 
-app.put("/modificando", (req, res) => {
-  res.send("modificando productos");
+app.put("/modificando/:id", (req, res) => {
+  const nuevoP = req.body;
+  const unProducto = productos.find(
+    (producto) => producto.id === parseInt(req.params.id)
+  );
+
+  if (!unProducto) {
+    res.status(404).json({ message: "producto no encontrado" });
+  }
+
+  productos = productos.map((p) =>
+    p.id === parseInt(req.params.id) ? { ...p, ...nuevoP } : p
+  );
+
+  res.json({
+    message:"producto actualizado"
 });
-app.delete("/eliminando", (req, res) => {
-  res.send("eliminando productos");
 });
+
+app.delete("/eliminando/:id", (req, res) => {
+  const unProducto = productos.find(
+    (producto) => producto.id === parseInt(req.params.id)
+  );
+
+  if (!unProducto) {
+    res.status(404).json({ message: "producto no encontrado" });
+  }
+  productos = productos.filter(
+    (producto) => producto.id !== parseInt(req.params.id)
+  );
+
+  res.sendStatus(204);
+});
+
+//R leer un solo producto
 app.get("/productos/:id", (req, res) => {
-  const cosa = productos.find(function (producto){
-    return producto.id === parseInt(req.params.id);
-  });
-  res.json(cosa);
+  const unProducto = productos.find(
+    (producto) => producto.id === parseInt(req.params.id)
+  );
+
+  if (!unProducto) {
+    res.status(404).json({ message: "producto no encontrado" });
+  }
+  res.json(unProducto);
 });
 
 app.listen(3000);
